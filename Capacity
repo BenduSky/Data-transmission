@@ -1,0 +1,9 @@
+p = 0:0.001:0.999999;
+H = 1-(p.*log2(1./p) + (1-p) .*log2(1./(1-p)));
+
+plot(p,H);
+title ('Capacidad binaria');
+xlabel('P');
+ylabel('C');
+grid on;
+
