@@ -1,0 +1,87 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def gaussian(mean, sigma, size):	#Example: N(3, 6.25)
+	return sigma * np.random.randn(size) + mean
+
+def z_noise(mean, sigma, size):		#Genera un array de ruido gaussiano
+	real = np.array( gaussian(mean, sigma, size) )
+	imag = np.array( gaussian(mean, sigma, size) ) * (1j)
+	return (real + imag)
+	
+def W(y,x,sigma):
+	tmp = y-x
+	return ( ( 1./( np.pi * sigma**2 ) ) * np.exp( -( np.real(tmp)**2 + np.imag(tmp)**2 )/ (sigma**2) ) )
+	
+def estimated_MI(z,symbols,sigma):	#Calcula la informacion mutua solo para un ruido --> z = noise , symbols = palabras codigo, sigma = dev std
+	value = 0
+	for x in symbols.keys():
+		sum = 0
+		for x_ in symbols.keys():
+			sum += symbols[x_][0] * W( symbols[x][1]+z, symbols[x_][1], sigma )
+		value += symbols[x][0] * np.log2( W( symbols[x][1]+z,symbols[x][1], sigma )/sum )
+	return value
+
+
+def test_capacity(max_energy, sigma, size, symbols, noise):		#Calcula la informacion mutua dado E in [0,max_energy] only for 4-PSK
+	E = np.arange(0,max_energy+1,1)
+	#noise = z_noise( 0, sigma, size )
+	samples = []
+	
+	for A in E:
+		for B in symbols.keys():
+			symbols[B][1] = symbols[B][2](float(A))
+
+		
+		#samples.append( np.mean( [estimated_MI(x,symbols, sigma) for x in noise] ) )
+		aux = 0
+		for x in noise:
+			aux = aux + estimated_MI(x,symbols, sigma)
+		samples.append( aux/ size)
+		
+	return (E,samples)
+	
+MODULATIONS = 	{"QPSK":{	"0":[(1./4),(0), (lambda x: np.sqrt(x/2)+np.sqrt(x/2)*1j) ], 
+							"1":[(1./4),(0), (lambda x: -np.sqrt(x/2)+np.sqrt(x/2)*1j) ], 
+							"2":[(1./4),(0), (lambda x: -np.sqrt(x/2)-np.sqrt(x/2)*1j) ], 
+							"3":[(1./4),(0), (lambda x: np.sqrt(x/2)-np.sqrt(x/2)*1j) ],
+						},
+				"BPSK": {	"0":[(1./2),(0), (lambda x: np.sqrt(x)+0*1j) ],
+							"1":[(1./2),(0), (lambda x: -np.sqrt(x)+0*1j) ]
+						},
+				"4PAM":{	"0":[(1./4),(0), (lambda x: np.sqrt(x/5)+0*1j) ],
+							"1":[(1./4),(0), (lambda x: -np.sqrt(x/5)+0*1j) ],
+							"2":[(1./4),(0), (lambda x: 3*np.sqrt(x/5)+0*1j) ],
+							"3":[(1./4),(0), (lambda x: -3*np.sqrt(x/5)+0*1j) ]
+						}
+}
+
+
+
+# MAIN()
+
+#############################INPUT VALUES########################################
+E = float(raw_input("Enter the energy value: "))
+mean  = float(raw_input("Enter the gaussian noise mean value: "))
+sigma = float(raw_input("Enter the gaussian noise sigma value: "))
+size = int(raw_input("Enter the number of samples: "))
+#################################################################################
+noise = z_noise( 0, sigma, size )
+muestras_QPSK = test_capacity(E, sigma, size, MODULATIONS["QPSK"], noise )
+muestras_BPSK = test_capacity(E, sigma, size, MODULATIONS["BPSK"], noise )
+muestras_4PAM = test_capacity(E, sigma, size, MODULATIONS["4PAM"], noise )
+
+
+fig=plt.figure("Gaussian Channel Plot")
+plt.suptitle("Gaussian noisy Channel (AWGN)", weight='bold')
+plt.xlabel("SNR = (E/sigma^2)", weight='bold')
+plt.ylabel("Max Capacity in bits", weight='bold')
+fig.patch.set_facecolor('tab:gray')
+plt.xticks(muestras_QPSK[0])
+plt.grid()
+plt.plot(muestras_QPSK[0], muestras_QPSK[1], label = 'QPSK')
+plt.plot(muestras_BPSK[0], muestras_BPSK[1], label = 'BPSK')
+plt.plot(muestras_4PAM[0], muestras_4PAM[1], label = '4PAM')
+plt.legend()
+
+plt.show()
