@@ -1,0 +1,4 @@
+syms x
+fplot(triangularPulse(x), [-2 2])
+ylabel('g(f)');
+xlabel('f(Hz)');
