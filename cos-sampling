@@ -1,16 +1,14 @@
-%%Muestreo de un coseno mediante un tren de pulsos
+%%Muestreo de un coseno
 
 %%Señal continua
-t = -20:0.1:20;
+t = 0:0.1:20;
 s = cos(t);
 
-%%Tren de pulsos
-d = -20 : 2: 20;  %Frecuencia de 'muestreo'
-y = pulstran(t,d,'tripuls',1,0); %%secuencia de pulsos.
+%%Señal muestreada con 50 muestras
+X = linspace(0,6*pi,50)';
+Y = (cos(X));
 
-%%Muestreo
-m = s.*y; %%multiplicacion punto a punto
 
-figure(3);subplot(3,1,1);plot(t,s); grid;title('Señal cos(t)');xlabel('tiempo (segundos)');ylabel ('magnitud');
-figure(3);subplot(3,1,2);plot(t,y); grid;title('Tren de pulsos');
-figure(3);subplot(3,1,3);plot(t,m); grid;title('Señal muestreada');
+
+figure(1);subplot(2,1,1);plot(t,s); grid;title('Señal cos(t)');xlabel('tiempo (segundos)');ylabel ('magnitud');
+figure(1);subplot(2,1,2);stem(Y);grid;title('Señal cos(t) muestreada');
