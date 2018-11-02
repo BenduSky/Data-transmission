@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy.plotting import plot
 
 def gaussian(mean, sigma, size):	#Example: N(3, 6.25)
 	return sigma * np.random.randn(size) + mean
 
 def z_noise(mean, sigma, size):		#Genera un array de ruido gaussiano
-	real = np.array( gaussian(mean, sigma, size) )
-	imag = np.array( gaussian(mean, sigma, size) ) * (1j)
+	real = np.array( gaussian(mean, sigma/2.0, size) )
+	imag = np.array( gaussian(mean, sigma/2.0, size) ) * (1j)
 	return (real + imag)
 	
 def W(y,x,sigma):
@@ -49,12 +50,21 @@ MODULATIONS = 	{"QPSK":{	"0":[(1./4),(0), (lambda x: np.sqrt(x/2)+np.sqrt(x/2)*1
 				"BPSK": {	"0":[(1./2),(0), (lambda x: np.sqrt(x)+0*1j) ],
 							"1":[(1./2),(0), (lambda x: -np.sqrt(x)+0*1j) ]
 						},
-				"4PAM":{	"0":[(1./4),(0), (lambda x: np.sqrt(x/5)+0*1j) ],
-							"1":[(1./4),(0), (lambda x: -np.sqrt(x/5)+0*1j) ],
-							"2":[(1./4),(0), (lambda x: 3*np.sqrt(x/5)+0*1j) ],
-							"3":[(1./4),(0), (lambda x: -3*np.sqrt(x/5)+0*1j) ]
+				"4PAM":{	"0":[(1./4),(0), (lambda x: np.sqrt(x/5.0)) ],
+							"1":[(1./4),(0), (lambda x: -np.sqrt(x/5.0)) ],
+							"2":[(1./4),(0), (lambda x: 3*np.sqrt(x/5.0)) ],
+							"3":[(1./4),(0), (lambda x: -3*np.sqrt(x/5.0)) ]
+						},
+				"8PSK":{	"0":[(1./8),(0), (lambda x: np.sqrt(x)+0*1j) ], 
+							"1":[(1./8),(0), (lambda x: -np.sqrt(x)+0*1j)  ], 
+							"2":[(1./8),(0), (lambda x: np.sqrt(x)*1j)  ], 
+							"3":[(1./8),(0), (lambda x: -np.sqrt(x)*1j)  ],
+							"4":[(1./8),(0), (lambda x: -np.sqrt(x)*np.cos(np.pi/4)+np.sqrt(x)*np.cos(np.pi/4)*1j) ], 
+							"5":[(1./8),(0), (lambda x: np.sqrt(x)*np.cos(np.pi/4)-np.sqrt(x)*np.cos(np.pi/4)*1j) ], 
+							"6":[(1./8),(0), (lambda x: np.sqrt(x)*np.cos(np.pi/4)+np.sqrt(x)*np.cos(np.pi/4)*1j) ], 
+							"7":[(1./8),(0), (lambda x: -np.sqrt(x)*np.cos(np.pi/4)-np.sqrt(x)*np.cos(np.pi/4)*1j) ],
 						}
-}
+}					
 
 
 
@@ -70,18 +80,21 @@ noise = z_noise( 0, sigma, size )
 muestras_QPSK = test_capacity(E, sigma, size, MODULATIONS["QPSK"], noise )
 muestras_BPSK = test_capacity(E, sigma, size, MODULATIONS["BPSK"], noise )
 muestras_4PAM = test_capacity(E, sigma, size, MODULATIONS["4PAM"], noise )
-
+muestras_8PSK = test_capacity(E, sigma, size, MODULATIONS["8PSK"], noise )
 
 fig=plt.figure("Gaussian Channel Plot")
 plt.suptitle("Gaussian noisy Channel (AWGN)", weight='bold')
 plt.xlabel("SNR = (E/sigma^2)", weight='bold')
 plt.ylabel("Max Capacity in bits", weight='bold')
-fig.patch.set_facecolor('tab:gray')
+#fig.patch.set_facecolor('tab:white')
 plt.xticks(muestras_QPSK[0])
 plt.grid()
 plt.plot(muestras_QPSK[0], muestras_QPSK[1], label = 'QPSK')
 plt.plot(muestras_BPSK[0], muestras_BPSK[1], label = 'BPSK')
 plt.plot(muestras_4PAM[0], muestras_4PAM[1], label = '4PAM')
+plt.plot(muestras_QPSK[0], muestras_8PSK[1], label = '8PSK')
 plt.legend()
+plt.plot()
 
 plt.show()
+
