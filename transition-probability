@@ -1,0 +1,13 @@
+a = normrnd(0,sqrt(1/2),10000,1);
+b = normrnd(0,sqrt(1/2),10000,1);
+
+c = normrnd(0,sqrt(3/2),10000,1);
+d = normrnd(0,sqrt(3/2),10000,1);
+
+F = (a.^2 + b.^2 );
+G = (c.^2 + d.^2 );
+
+histogram( F,'Normalization','pdf')
+hold on;
+histogram( G,'Normalization','pdf')
+hold off;
