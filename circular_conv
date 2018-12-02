@@ -1,0 +1,6 @@
+S = linspace(-5,5,5);
+X = [0 1 2 3 0];
+stem(S,X,'filled')
+
+Y = [0 3 1 2 0];
+stem(S,Y,'filled')
